@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Macros">
+<title>Macro Tracker</title>
+<style>
+  :root {
+    --paper: #FAF7F0;
+    --ink: #2A2620;
+    --ink-soft: #6B6558;
+    --rule: #2A2620;
+    --rule-light: #D8D2C2;
+    --card: #FFFFFF;
+    --protein: #4A5D3A;
+    --carbs: #B8792E;
+    --fat: #8B5A4A;
+    --cal: #2A2620;
+    --danger: #A33B2E;
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body {
+    margin: 0; padding: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  body { padding: 20px 16px 60px; max-width: 480px; margin: 0 auto; }
+
+  .brand {
+    text-align: center; margin-bottom: 18px;
+  }
+  .brand-mark {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    color: var(--ink);
+  }
+  .brand-date {
+    font-size: 12px;
+    color: var(--ink-soft);
+    margin-top: 4px;
+  }
+
+  .label-panel {
+    background: var(--card);
+    border: 3px solid var(--ink);
+    padding: 14px 16px 16px;
+    margin-bottom: 16px;
+  }
+  .label-title {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-weight: 700;
+    font-size: 26px;
+    letter-spacing: -0.5px;
+    border-bottom: 8px solid var(--ink);
+    padding-bottom: 6px;
+    margin-bottom: 6px;
+  }
+  .label-sub {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    padding: 4px 0;
+    border-bottom: 1px solid var(--rule-light);
+  }
+  .label-sub b { font-weight: 700; }
+
+  .macro-row {
+    padding: 8px 0;
+    border-bottom: 1px solid var(--rule-light);
+  }
+  .macro-row:last-child { border-bottom: none; }
+  .macro-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    font-size: 14px;
+    margin-bottom: 6px;
+  }
+  .macro-name { font-weight: 700; }
+  .macro-nums { color: var(--ink-soft); font-variant-numeric: tabular-nums; }
+  .macro-nums b { color: var(--ink); }
+  .bar-track {
+    height: 7px;
+    background: var(--rule-light);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .bar-fill { height: 100%; border-radius: 4px; transition: width .3s ease; }
+  .fill-cal { background: var(--cal); }
+  .fill-protein { background: var(--protein); }
+  .fill-carbs { background: var(--carbs); }
+  .fill-fat { background: var(--fat); }
+  .over-flag { color: var(--danger); font-weight: 700; }
+
+  .section-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--ink-soft);
+    margin: 22px 0 10px;
+    font-weight: 700;
+  }
+
+  .entry-form {
+    background: var(--card);
+    border: 1.5px solid var(--ink);
+    padding: 14px;
+    margin-bottom: 16px;
+  }
+  .form-row { margin-bottom: 10px; }
+  .form-row label {
+    display: block;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--ink-soft);
+    margin-bottom: 4px;
+    font-weight: 700;
+  }
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    gap: 8px;
+  }
+  input {
+    width: 100%;
+    padding: 9px 10px;
+    border: 1.5px solid var(--ink);
+    background: var(--paper);
+    color: var(--ink);
+    font-size: 15px;
+    border-radius: 0;
+    font-family: inherit;
+  }
+  input:focus { outline: none; border-color: var(--protein); }
+  input[type=number] { font-variant-numeric: tabular-nums; }
+
+  .btn {
+    width: 100%;
+    padding: 12px;
+    background: var(--ink);
+    color: var(--paper);
+    border: none;
+    font-size: 14px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    cursor: pointer;
+    margin-top: 4px;
+  }
+  .btn:active { opacity: 0.8; }
+  .btn-ghost {
+    background: transparent;
+    color: var(--ink);
+    border: 1.5px solid var(--ink);
+  }
+
+  .quick-adds {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 14px;
+  }
+  .quick-chip {
+    font-size: 12px;
+    padding: 7px 12px;
+    border: 1.5px solid var(--rule-light);
+    background: var(--card);
+    color: var(--ink-soft);
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .quick-chip:active { background: var(--rule-light); }
+
+  .entry {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--card);
+    border: 1px solid var(--rule-light);
+    border-left: 4px solid var(--ink);
+    padding: 10px 12px;
+    margin-bottom: 8px;
+  }
+  .entry-name { font-size: 14px; font-weight: 700; margin-bottom: 2px; }
+  .entry-macros { font-size: 12px; color: var(--ink-soft); font-variant-numeric: tabular-nums; }
+  .entry-del {
+    background: none; border: none; color: var(--ink-soft);
+    font-size: 20px; cursor: pointer; padding: 4px 8px;
+    line-height: 1;
+  }
+  .entry-del:active { color: var(--danger); }
+
+  .empty {
+    text-align: center;
+    color: var(--ink-soft);
+    font-size: 13px;
+    padding: 24px 0;
+  }
+
+  .settings-toggle {
+    text-align: center;
+    font-size: 12px;
+    color: var(--ink-soft);
+    margin-top: 22px;
+    cursor: pointer;
+    text-decoration: underline;
+  }
+  .settings-panel { display: none; margin-top: 10px; }
+  .settings-panel.open { display: block; }
+
+  .mode-tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 14px;
+  }
+  .mode-tab {
+    flex: 1;
+    text-align: center;
+    padding: 9px;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border: 1.5px solid var(--ink);
+    background: transparent;
+    color: var(--ink-soft);
+    cursor: pointer;
+  }
+  .mode-tab.active { background: var(--ink); color: var(--paper); }
+  .mode-panel { display: none; }
+  .mode-panel.active { display: block; }
+  .per100-hint {
+    font-size: 11px;
+    color: var(--ink-soft);
+    margin: -4px 0 10px;
+  }
+  .estimate-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+  .btn-estimate {
+    flex-shrink: 0;
+    padding: 9px 14px;
+    background: var(--protein);
+    color: #fff;
+    border: none;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+  }
+  .btn-estimate:disabled { opacity: 0.5; }
+  .estimate-status {
+    font-size: 11px;
+    color: var(--ink-soft);
+    margin: -4px 0 10px;
+    min-height: 14px;
+  }
+  .estimate-status.error { color: var(--danger); }
+  .preview-box {
+    background: var(--paper);
+    border: 1px dashed var(--rule-light);
+    padding: 8px 10px;
+    font-size: 12px;
+    color: var(--ink-soft);
+    margin-bottom: 10px;
+    font-variant-numeric: tabular-nums;
+  }
+  .preview-box b { color: var(--ink); }
+</style>
+</head>
+<body>
+  <div class="sr-only" style="position:absolute;width:1px;height:1px;overflow:hidden;">Daily macro and calorie tracker with an editable food log and nutrition label style summary.</div>
+
+  <div class="brand">
+    <div class="brand-mark">Daily Log</div>
+    <div class="brand-date" id="dateDisplay">—</div>
+  </div>
+
+  <div class="label-panel">
+    <div class="label-title">Nutrition</div>
+    <div class="label-sub"><span>Calories eaten</span><b id="calEaten">0</b></div>
+    <div class="label-sub"><span>Daily target</span><b id="calTarget">1850</b></div>
+
+    <div style="margin-top:12px;">
+      <div class="macro-row">
+        <div class="macro-top">
+          <span class="macro-name">Calories</span>
+          <span class="macro-nums" id="calNums">0 / 1850</span>
+        </div>
+        <div class="bar-track"><div class="bar-fill fill-cal" id="barCal" style="width:0%"></div></div>
+      </div>
+      <div class="macro-row">
+        <div class="macro-top">
+          <span class="macro-name" style="color:var(--protein)">Protein</span>
+          <span class="macro-nums" id="proteinNums">0g / 150g</span>
+        </div>
+        <div class="bar-track"><div class="bar-fill fill-protein" id="barProtein" style="width:0%"></div></div>
+      </div>
+      <div class="macro-row">
+        <div class="macro-top">
+          <span class="macro-name" style="color:var(--carbs)">Carbs</span>
+          <span class="macro-nums" id="carbsNums">0g / 150g</span>
+        </div>
+        <div class="bar-track"><div class="bar-fill fill-carbs" id="barCarbs" style="width:0%"></div></div>
+      </div>
+      <div class="macro-row">
+        <div class="macro-top">
+          <span class="macro-name" style="color:var(--fat)">Fat</span>
+          <span class="macro-nums" id="fatNums">0g / 72g</span>
+        </div>
+        <div class="bar-track"><div class="bar-fill fill-fat" id="barFat" style="width:0%"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-label">Add food</div>
+
+  <div class="mode-tabs">
+    <button class="mode-tab active" id="tabWeight">By weight (g)</button>
+    <button class="mode-tab" id="tabTotal">Already know totals</button>
+  </div>
+
+  <div class="entry-form mode-panel active" id="panelWeight">
+    <div class="quick-adds">
+      <div class="quick-chip" data-per100="Chicken breast,165,31,0,3.6">Chicken breast</div>
+      <div class="quick-chip" data-per100="Cooked rice,130,2.7,28,0.3">Cooked rice</div>
+      <div class="quick-chip" data-per100="Salmon,208,20,0,13">Salmon</div>
+      <div class="quick-chip" data-per100="Lean beef mince,215,26,0,12">Beef mince</div>
+      <div class="quick-chip" data-per100="Shrimp,99,24,0.2,0.3">Shrimp</div>
+      <div class="quick-chip" data-per100="Potato,87,2,20,0.1">Potato</div>
+      <div class="quick-chip" data-per100="Greek yoghurt,59,10,3.6,0.4">Greek yoghurt</div>
+      <div class="quick-chip" data-per100="Apple strudel with cream,290,3.5,32,16">Apple strudel + cream</div>
+    </div>
+    <div class="form-row">
+      <label>Food name</label>
+      <input type="text" id="wName" placeholder="e.g. Chicken breast">
+    </div>
+    <div class="form-row">
+      <label>Amount (grams)</label>
+      <input type="number" id="wGrams" inputmode="numeric" placeholder="e.g. 125">
+    </div>
+    <div class="estimate-row">
+      <button class="btn-estimate" id="estimateBtn">Estimate macros</button>
+    </div>
+    <div class="estimate-status" id="estimateStatus"></div>
+    <div class="per100-hint">Or enter per-100g values yourself if you have a label</div>
+    <div class="form-grid">
+      <div>
+        <label style="font-size:10px;">Kcal</label>
+        <input type="number" id="wCal100" inputmode="numeric" placeholder="0">
+      </div>
+      <div>
+        <label style="font-size:10px; color:var(--protein);">Protein</label>
+        <input type="number" id="wProtein100" inputmode="numeric" placeholder="0">
+      </div>
+      <div>
+        <label style="font-size:10px; color:var(--carbs);">Carbs</label>
+        <input type="number" id="wCarbs100" inputmode="numeric" placeholder="0">
+      </div>
+      <div>
+        <label style="font-size:10px; color:var(--fat);">Fat</label>
+        <input type="number" id="wFat100" inputmode="numeric" placeholder="0">
+      </div>
+    </div>
+    <div class="preview-box" id="wPreview">Enter grams and per-100g values to see the total.</div>
+    <button class="btn" id="addWeightBtn">Add to log</button>
+  </div>
+
+  <div class="entry-form mode-panel" id="panelTotal">
+    <div class="quick-adds">
+      <div class="quick-chip" data-p="Toast, 1 slice,90,4,15,1">Toast, 1 slice</div>
+      <div class="quick-chip" data-p="Egg, 1,70,6,1,5">Egg, 1</div>
+      <div class="quick-chip" data-p="Greek yoghurt serve,120,18,7,1">Greek yoghurt serve</div>
+      <div class="quick-chip" data-p="Whey shake,120,25,3,2">Whey shake</div>
+      <div class="quick-chip" data-p="Glass of milk,150,8,12,8">Glass of milk</div>
+    </div>
+    <div class="form-row">
+      <label>Food name</label>
+      <input type="text" id="foodName" placeholder="e.g. Chicken and rice">
+    </div>
+    <div class="form-grid">
+      <div>
+        <label style="font-size:10px;">Kcal</label>
+        <input type="number" id="foodCal" inputmode="numeric" placeholder="0">
+      </div>
+      <div>
+        <label style="font-size:10px; color:var(--protein);">Protein</label>
+        <input type="number" id="foodProtein" inputmode="numeric" placeholder="0">
+      </div>
+      <div>
+        <label style="font-size:10px; color:var(--carbs);">Carbs</label>
+        <input type="number" id="foodCarbs" inputmode="numeric" placeholder="0">
+      </div>
+      <div>
+        <label style="font-size:10px; color:var(--fat);">Fat</label>
+        <input type="number" id="foodFat" inputmode="numeric" placeholder="0">
+      </div>
+    </div>
+    <button class="btn" id="addBtn">Add to log</button>
+  </div>
+
+  <div class="section-label">Today's log</div>
+  <div id="entryList"></div>
+  <div class="empty" id="emptyMsg">Nothing logged yet today.</div>
+
+  <div class="settings-toggle" id="settingsToggle">Edit daily targets</div>
+  <div class="settings-panel" id="settingsPanel">
+    <div class="entry-form" style="margin-top:10px;">
+      <div class="form-grid">
+        <div>
+          <label style="font-size:10px;">Kcal</label>
+          <input type="number" id="targetCal" value="1850">
+        </div>
+        <div>
+          <label style="font-size:10px; color:var(--protein);">Protein</label>
+          <input type="number" id="targetProtein" value="150">
+        </div>
+        <div>
+          <label style="font-size:10px; color:var(--carbs);">Carbs</label>
+          <input type="number" id="targetCarbs" value="150">
+        </div>
+        <div>
+          <label style="font-size:10px; color:var(--fat);">Fat</label>
+          <input type="number" id="targetFat" value="72">
+        </div>
+      </div>
+      <button class="btn btn-ghost" id="saveTargets">Save targets</button>
+    </div>
+  </div>
+
+<script>
+(function(){
+  var todayKey = new Date().toISOString().slice(0,10);
+  var logKey = 'log:' + todayKey;
+  var targetsKey = 'targets';
+  var entries = [];
+  var targets = { cal: 1850, protein: 150, carbs: 150, fat: 72 };
+
+  var dateDisplay = document.getElementById('dateDisplay');
+  dateDisplay.textContent = new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' });
+
+  function round(n) { return Math.round(n * 10) / 10; }
+
+  async function loadAll() {
+    try {
+      var t = await window.storage.get(targetsKey, false);
+      if (t && t.value) targets = JSON.parse(t.value);
+    } catch(e) {}
+    try {
+      var l = await window.storage.get(logKey, false);
+      if (l && l.value) entries = JSON.parse(l.value);
+    } catch(e) {}
+    applyTargetsToInputs();
+    render();
+  }
+
+  function applyTargetsToInputs() {
+    document.getElementById('targetCal').value = targets.cal;
+    document.getElementById('targetProtein').value = targets.protein;
+    document.getElementById('targetCarbs').value = targets.carbs;
+    document.getElementById('targetFat').value = targets.fat;
+  }
+
+  async function saveLog() {
+    try { await window.storage.set(logKey, JSON.stringify(entries), false); }
+    catch(e) { console.error('save log failed', e); }
+  }
+
+  async function saveTargets() {
+    try { await window.storage.set(targetsKey, JSON.stringify(targets), false); }
+    catch(e) { console.error('save targets failed', e); }
+  }
+
+  function totals() {
+    return entries.reduce(function(acc, e) {
+      acc.cal += Number(e.cal) || 0;
+      acc.protein += Number(e.protein) || 0;
+      acc.carbs += Number(e.carbs) || 0;
+      acc.fat += Number(e.fat) || 0;
+      return acc;
+    }, { cal: 0, protein: 0, carbs: 0, fat: 0 });
+  }
+
+  function setBar(id, val, target) {
+    var pct = target > 0 ? Math.min(100, (val / target) * 100) : 0;
+    document.getElementById(id).style.width = pct + '%';
+  }
+
+  function render() {
+    var t = totals();
+    document.getElementById('calEaten').textContent = round(t.cal);
+    document.getElementById('calTarget').textContent = targets.cal;
+
+    var calOver = t.cal > targets.cal;
+    document.getElementById('calNums').innerHTML = round(t.cal) + ' / ' + targets.cal + (calOver ? ' <span class="over-flag">over</span>' : '');
+    document.getElementById('proteinNums').textContent = round(t.protein) + 'g / ' + targets.protein + 'g';
+    document.getElementById('carbsNums').textContent = round(t.carbs) + 'g / ' + targets.carbs + 'g';
+    document.getElementById('fatNums').textContent = round(t.fat) + 'g / ' + targets.fat + 'g';
+
+    setBar('barCal', t.cal, targets.cal);
+    setBar('barProtein', t.protein, targets.protein);
+    setBar('barCarbs', t.carbs, targets.carbs);
+    setBar('barFat', t.fat, targets.fat);
+
+    var list = document.getElementById('entryList');
+    var empty = document.getElementById('emptyMsg');
+    list.innerHTML = '';
+    if (entries.length === 0) {
+      empty.style.display = 'block';
+    } else {
+      empty.style.display = 'none';
+      entries.slice().reverse().forEach(function(e, revIdx) {
+        var idx = entries.length - 1 - revIdx;
+        var row = document.createElement('div');
+        row.className = 'entry';
+        row.innerHTML =
+          '<div><div class="entry-name">' + escapeHtml(e.name || 'Food') + '</div>' +
+          '<div class="entry-macros">' + round(e.cal) + ' kcal · P ' + round(e.protein) + 'g · C ' + round(e.carbs) + 'g · F ' + round(e.fat) + 'g</div></div>' +
+          '<button class="entry-del" data-idx="' + idx + '" aria-label="Delete entry"><i class="ti ti-x"></i>&times;</button>';
+        list.appendChild(row);
+      });
+      list.querySelectorAll('.entry-del').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          var i = Number(btn.getAttribute('data-idx'));
+          entries.splice(i, 1);
+          saveLog();
+          render();
+        });
+      });
+    }
+  }
+
+  function escapeHtml(s) {
+    var d = document.createElement('div');
+    d.textContent = s;
+    return d.innerHTML;
+  }
+
+  document.getElementById('addBtn').addEventListener('click', function() {
+    var name = document.getElementById('foodName').value.trim() || 'Food';
+    var cal = Number(document.getElementById('foodCal').value) || 0;
+    var protein = Number(document.getElementById('foodProtein').value) || 0;
+    var carbs = Number(document.getElementById('foodCarbs').value) || 0;
+    var fat = Number(document.getElementById('foodFat').value) || 0;
+    if (cal === 0 && protein === 0 && carbs === 0 && fat === 0) return;
+    entries.push({ name: name, cal: cal, protein: protein, carbs: carbs, fat: fat, t: Date.now() });
+    document.getElementById('foodName').value = '';
+    document.getElementById('foodCal').value = '';
+    document.getElementById('foodProtein').value = '';
+    document.getElementById('foodCarbs').value = '';
+    document.getElementById('foodFat').value = '';
+    saveLog();
+    render();
+  });
+
+  document.querySelectorAll('#panelTotal .quick-chip').forEach(function(chip) {
+    chip.addEventListener('click', function() {
+      var parts = chip.getAttribute('data-p').split(',');
+      entries.push({
+        name: parts[0],
+        cal: Number(parts[1]) || 0,
+        protein: Number(parts[2]) || 0,
+        carbs: Number(parts[3]) || 0,
+        fat: Number(parts[4]) || 0,
+        t: Date.now()
+      });
+      saveLog();
+      render();
+    });
+  });
+
+  document.querySelectorAll('#panelWeight .quick-chip').forEach(function(chip) {
+    chip.addEventListener('click', function() {
+      var parts = chip.getAttribute('data-per100').split(',');
+      document.getElementById('wName').value = parts[0];
+      document.getElementById('wCal100').value = parts[1];
+      document.getElementById('wProtein100').value = parts[2];
+      document.getElementById('wCarbs100').value = parts[3];
+      document.getElementById('wFat100').value = parts[4];
+      updateWeightPreview();
+      document.getElementById('wGrams').focus();
+    });
+  });
+
+  function updateWeightPreview() {
+    var grams = Number(document.getElementById('wGrams').value) || 0;
+    var c100 = Number(document.getElementById('wCal100').value) || 0;
+    var p100 = Number(document.getElementById('wProtein100').value) || 0;
+    var cb100 = Number(document.getElementById('wCarbs100').value) || 0;
+    var f100 = Number(document.getElementById('wFat100').value) || 0;
+    var mult = grams / 100;
+    var preview = document.getElementById('wPreview');
+    if (grams > 0 && (c100 || p100 || cb100 || f100)) {
+      preview.innerHTML = grams + 'g = <b>' + round(c100 * mult) + ' kcal</b> · P <b>' + round(p100 * mult) + 'g</b> · C <b>' + round(cb100 * mult) + 'g</b> · F <b>' + round(f100 * mult) + 'g</b>';
+    } else {
+      preview.textContent = 'Enter grams and per-100g values to see the total.';
+    }
+  }
+  ['wGrams','wCal100','wProtein100','wCarbs100','wFat100'].forEach(function(id) {
+    document.getElementById(id).addEventListener('input', updateWeightPreview);
+  });
+
+  document.getElementById('addWeightBtn').addEventListener('click', function() {
+    var name = document.getElementById('wName').value.trim() || 'Food';
+    var grams = Number(document.getElementById('wGrams').value) || 0;
+    var c100 = Number(document.getElementById('wCal100').value) || 0;
+    var p100 = Number(document.getElementById('wProtein100').value) || 0;
+    var cb100 = Number(document.getElementById('wCarbs100').value) || 0;
+    var f100 = Number(document.getElementById('wFat100').value) || 0;
+    if (grams === 0 || (c100 === 0 && p100 === 0 && cb100 === 0 && f100 === 0)) return;
+    var mult = grams / 100;
+    entries.push({
+      name: name + ' (' + grams + 'g)',
+      cal: round(c100 * mult),
+      protein: round(p100 * mult),
+      carbs: round(cb100 * mult),
+      fat: round(f100 * mult),
+      t: Date.now()
+    });
+    document.getElementById('wName').value = '';
+    document.getElementById('wGrams').value = '';
+    document.getElementById('wCal100').value = '';
+    document.getElementById('wProtein100').value = '';
+    document.getElementById('wCarbs100').value = '';
+    document.getElementById('wFat100').value = '';
+    updateWeightPreview();
+    saveLog();
+    render();
+  });
+
+  document.getElementById('estimateBtn').addEventListener('click', async function() {
+    var name = document.getElementById('wName').value.trim();
+    var grams = document.getElementById('wGrams').value.trim();
+    var statusEl = document.getElementById('estimateStatus');
+    var btn = document.getElementById('estimateBtn');
+    if (!name) {
+      statusEl.textContent = 'Enter a food name first.';
+      statusEl.classList.add('error');
+      return;
+    }
+    statusEl.classList.remove('error');
+    statusEl.textContent = 'Estimating...';
+    btn.disabled = true;
+    try {
+      var userMsg = 'Food: ' + name + (grams ? '\nPortion context: this specific serving is ' + grams + 'g total (use this only as context for the cut/style, e.g. a thick vs thin chop — your answer must still be normalized PER 100 GRAMS, not per this portion).' : '');
+      var response = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-6',
+          max_tokens: 200,
+          system: 'You are a nutrition estimation engine. Given a food description (which may include details like fat percentage, cut, cooking method, or brand) and optional portion context, estimate its typical nutrition PER 100 GRAMS as cooked/prepared unless the description implies raw. Take described details like "lean, ~10% fat" seriously and adjust fat/calories accordingly rather than using generic defaults. Respond with ONLY a JSON object, no prose, no markdown fences, in this exact shape: {"cal100": number, "protein100": number, "carbs100": number, "fat100": number}. All numbers rounded to 1 decimal place.',
+          messages: [
+            { role: 'user', content: userMsg }
+          ]
+        })
+      });
+      var data = await response.json();
+      var text = (data.content || []).map(function(b) { return b.text || ''; }).join('');
+      var clean = text.replace(/```json|```/g, '').trim();
+      var parsed = JSON.parse(clean);
+      document.getElementById('wCal100').value = parsed.cal100;
+      document.getElementById('wProtein100').value = parsed.protein100;
+      document.getElementById('wCarbs100').value = parsed.carbs100;
+      document.getElementById('wFat100').value = parsed.fat100;
+      updateWeightPreview();
+      statusEl.textContent = 'Estimated per 100g — feel free to adjust if you know better.';
+    } catch (e) {
+      console.error('estimate failed', e);
+      statusEl.textContent = "Couldn't estimate that one. Try rephrasing, or enter values manually.";
+      statusEl.classList.add('error');
+    } finally {
+      btn.disabled = false;
+    }
+  });
+
+  document.getElementById('tabWeight').addEventListener('click', function() {
+    document.getElementById('tabWeight').classList.add('active');
+    document.getElementById('tabTotal').classList.remove('active');
+    document.getElementById('panelWeight').classList.add('active');
+    document.getElementById('panelTotal').classList.remove('active');
+  });
+  document.getElementById('tabTotal').addEventListener('click', function() {
+    document.getElementById('tabTotal').classList.add('active');
+    document.getElementById('tabWeight').classList.remove('active');
+    document.getElementById('panelTotal').classList.add('active');
+    document.getElementById('panelWeight').classList.remove('active');
+  });
+
+  document.getElementById('settingsToggle').addEventListener('click', function() {
+    document.getElementById('settingsPanel').classList.toggle('open');
+  });
+
+  document.getElementById('saveTargets').addEventListener('click', function() {
+    targets = {
+      cal: Number(document.getElementById('targetCal').value) || 1850,
+      protein: Number(document.getElementById('targetProtein').value) || 150,
+      carbs: Number(document.getElementById('targetCarbs').value) || 150,
+      fat: Number(document.getElementById('targetFat').value) || 72
+    };
+    saveTargets();
+    document.getElementById('settingsPanel').classList.remove('open');
+    render();
+  });
+
+  loadAll();
+})();
+</script>
+</body>
+</html>
