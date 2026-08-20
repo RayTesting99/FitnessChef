@@ -1,0 +1,16 @@
+{
+  "name": "macro-estimate-backend",
+  "version": "1.0.0",
+  "description": "Backend that proxies macro estimate requests to the Anthropic API.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "cors": "^2.8.5"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

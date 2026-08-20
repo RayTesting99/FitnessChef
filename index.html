@@ -438,6 +438,13 @@
       </div>
       <button class="btn btn-ghost" id="saveTargets">Save targets</button>
     </div>
+    <div class="entry-form" style="margin-top:10px;">
+      <div class="form-row">
+        <label>Estimate backend URL (from Render)</label>
+        <input type="text" id="backendUrl" placeholder="https://your-app.onrender.com/estimate">
+      </div>
+      <button class="btn btn-ghost" id="saveBackendBtn">Save backend URL</button>
+    </div>
   </div>
 
 <script>
@@ -445,8 +452,10 @@
   var todayKey = new Date().toISOString().slice(0,10);
   var logKey = 'log:' + todayKey;
   var targetsKey = 'targets';
+  var backendKey = 'backendUrl';
   var entries = [];
   var targets = { cal: 1850, protein: 150, carbs: 150, fat: 72 };
+  var backendUrl = '';
 
   var dateDisplay = document.getElementById('dateDisplay');
   dateDisplay.textContent = new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' });
@@ -455,14 +464,19 @@
 
   async function loadAll() {
     try {
-      var t = await window.storage.get(targetsKey, false);
-      if (t && t.value) targets = JSON.parse(t.value);
+      var t = localStorage.getItem(targetsKey);
+      if (t) targets = JSON.parse(t);
     } catch(e) {}
     try {
-      var l = await window.storage.get(logKey, false);
-      if (l && l.value) entries = JSON.parse(l.value);
+      var l = localStorage.getItem(logKey);
+      if (l) entries = JSON.parse(l);
+    } catch(e) {}
+    try {
+      var b = localStorage.getItem(backendKey);
+      if (b) backendUrl = b;
     } catch(e) {}
     applyTargetsToInputs();
+    applyBackendToInput();
     render();
   }
 
@@ -474,13 +488,23 @@
   }
 
   async function saveLog() {
-    try { await window.storage.set(logKey, JSON.stringify(entries), false); }
+    try { localStorage.setItem(logKey, JSON.stringify(entries)); }
     catch(e) { console.error('save log failed', e); }
   }
 
   async function saveTargets() {
-    try { await window.storage.set(targetsKey, JSON.stringify(targets), false); }
+    try { localStorage.setItem(targetsKey, JSON.stringify(targets)); }
     catch(e) { console.error('save targets failed', e); }
+  }
+
+  function saveBackend() {
+    try { localStorage.setItem(backendKey, backendUrl); }
+    catch(e) { console.error('save backend url failed', e); }
+  }
+
+  function applyBackendToInput() {
+    var el = document.getElementById('backendUrl');
+    if (el) el.value = backendUrl;
   }
 
   function totals() {
@@ -650,27 +674,24 @@
       statusEl.classList.add('error');
       return;
     }
+    if (!backendUrl) {
+      statusEl.textContent = 'Set your backend URL first (Edit daily targets → Estimate backend URL).';
+      statusEl.classList.add('error');
+      return;
+    }
     statusEl.classList.remove('error');
     statusEl.textContent = 'Estimating...';
     btn.disabled = true;
     try {
-      var userMsg = 'Food: ' + name + (grams ? '\nPortion context: this specific serving is ' + grams + 'g total (use this only as context for the cut/style, e.g. a thick vs thin chop — your answer must still be normalized PER 100 GRAMS, not per this portion).' : '');
-      var response = await fetch('https://api.anthropic.com/v1/messages', {
+      var response = await fetch(backendUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          model: 'claude-sonnet-4-6',
-          max_tokens: 200,
-          system: 'You are a nutrition estimation engine. Given a food description (which may include details like fat percentage, cut, cooking method, or brand) and optional portion context, estimate its typical nutrition PER 100 GRAMS as cooked/prepared unless the description implies raw. Take described details like "lean, ~10% fat" seriously and adjust fat/calories accordingly rather than using generic defaults. Respond with ONLY a JSON object, no prose, no markdown fences, in this exact shape: {"cal100": number, "protein100": number, "carbs100": number, "fat100": number}. All numbers rounded to 1 decimal place.',
-          messages: [
-            { role: 'user', content: userMsg }
-          ]
-        })
+        body: JSON.stringify({ food: name, grams: grams })
       });
-      var data = await response.json();
-      var text = (data.content || []).map(function(b) { return b.text || ''; }).join('');
-      var clean = text.replace(/```json|```/g, '').trim();
-      var parsed = JSON.parse(clean);
+      var parsed = await response.json();
+      if (!response.ok || parsed.error) {
+        throw new Error(parsed.error || 'Backend returned an error');
+      }
       document.getElementById('wCal100').value = parsed.cal100;
       document.getElementById('wProtein100').value = parsed.protein100;
       document.getElementById('wCarbs100').value = parsed.carbs100;
@@ -679,11 +700,19 @@
       statusEl.textContent = 'Estimated per 100g — feel free to adjust if you know better.';
     } catch (e) {
       console.error('estimate failed', e);
-      statusEl.textContent = "Couldn't estimate that one. Try rephrasing, or enter values manually.";
+      statusEl.textContent = "Couldn't reach the estimate backend. Check the URL, or enter values manually.";
       statusEl.classList.add('error');
     } finally {
       btn.disabled = false;
     }
+  });
+
+  document.getElementById('saveBackendBtn').addEventListener('click', function() {
+    backendUrl = document.getElementById('backendUrl').value.trim();
+    saveBackend();
+    var statusEl = document.getElementById('estimateStatus');
+    statusEl.classList.remove('error');
+    statusEl.textContent = 'Backend URL saved.';
   });
 
   document.getElementById('tabWeight').addEventListener('click', function() {
