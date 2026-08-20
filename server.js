@@ -6,7 +6,7 @@ app.use(cors());
 app.use(express.json());
 
 const API_KEY = process.env.GEMINI_API_KEY;
-const MODEL = 'gemini-2.5-flash-lite'; // cheap, fast, good enough for this task
+const MODEL = 'gemini-3.1-flash-lite'; // cheap, fast, good enough for this task
 
 app.post('/estimate', async (req, res) => {
   if (!API_KEY) {
