@@ -47,7 +47,13 @@ function titleCase(s: string): string {
   return s.toLowerCase().replace(/(^|[\s,(])([a-z])/g, (_, p, c) => p + c.toUpperCase());
 }
 
+// In-memory cache so repeat searches cost no API quota.
+const cache = new Map<string, FoodResult[]>();
+
 export async function searchFoods(query: string, signal?: AbortSignal): Promise<FoodResult[]> {
+  const key = query.trim().toLowerCase();
+  const hit = cache.get(key);
+  if (hit) return hit;
   const url =
     `${BASE}/foods/search?api_key=${encodeURIComponent(API_KEY)}` +
     `&query=${encodeURIComponent(query)}&pageSize=25`;
@@ -55,5 +61,9 @@ export async function searchFoods(query: string, signal?: AbortSignal): Promise<
   if (res.status === 429) throw new Error('USDA rate limit reached. Add your own API key or try again later.');
   if (!res.ok) throw new Error(`USDA search failed (${res.status})`);
   const json = (await res.json()) as { foods?: UsdaFood[] };
-  return (json.foods ?? []).map(toResult).filter((f) => f.cal100 > 0 || f.protein100 > 0 || f.carbs100 > 0 || f.fat100 > 0);
+  const foods = (json.foods ?? [])
+    .map(toResult)
+    .filter((f) => f.cal100 > 0 || f.protein100 > 0 || f.carbs100 > 0 || f.fat100 > 0);
+  cache.set(key, foods);
+  return foods;
 }

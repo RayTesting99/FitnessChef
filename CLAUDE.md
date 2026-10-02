@@ -45,11 +45,12 @@ Both sources produce the same result shape, macros **per 100 g**, so they feed i
 
 **Free tier**
 - Manual food entry (name, grams, macros).
-- Food search through the **USDA FoodData Central** API (https://fdc.nal.usda.gov/api-guide). It's free and needs an api.data.gov key.
+- Food search through the **USDA FoodData Central** API (https://fdc.nal.usda.gov/api-guide). It's free and needs an api.data.gov key. This is the sole free-tier search source and returns generic/average macros (e.g. "beef", "beef flank"), not brand-specific products. Search runs on submit (not per keystroke) and results are cached in memory to stay under the USDA rate limit.
 - Daily targets, the daily log and history.
 
 **Paid tier**
 - AI macro analysis from a photo or video of a meal, through the Gemini backend.
+- **Planned, not built yet:** brand-specific product search (e.g. Australian brands). It is not part of the free tier and is planned as a paid feature alongside the photo/video analysis. Data source and approach are undecided.
 - The paywall must be enforced **server-side** on the AI endpoints, not only hidden in the UI.
 
 ## Gamification (v1: keep it simple)

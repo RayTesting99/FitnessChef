@@ -1,5 +1,5 @@
 import { useNavigation } from '@react-navigation/native';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   FlatList,
@@ -33,33 +33,29 @@ export function LogMealScreen() {
   const [selected, setSelected] = useState<FoodResult | null>(null);
   const [gramsText, setGramsText] = useState('100');
 
-  // Debounced search-as-you-type; the abort controller drops stale responses.
-  useEffect(() => {
+  const abortRef = useRef<AbortController | null>(null);
+
+  // Search on submit (not per keystroke) so we don't burn the USDA hourly quota.
+  async function runSearch() {
     const q = query.trim();
-    if (q.length < 2) {
-      setResults([]);
-      setSearched(false);
-      setError(null);
-      return;
-    }
+    if (q.length < 2) return;
+    Keyboard.dismiss();
+    abortRef.current?.abort();
     const ctrl = new AbortController();
-    const t = setTimeout(async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        setResults(await searchFoods(q, ctrl.signal));
-        setSearched(true);
-      } catch (e: any) {
-        if (e?.name !== 'AbortError') setError(e?.message ?? 'Search failed');
-      } finally {
-        if (!ctrl.signal.aborted) setLoading(false);
-      }
-    }, 400);
-    return () => {
-      clearTimeout(t);
-      ctrl.abort();
-    };
-  }, [query]);
+    abortRef.current = ctrl;
+    setLoading(true);
+    setError(null);
+    try {
+      setResults(await searchFoods(q, ctrl.signal));
+      setSearched(true);
+    } catch (e: any) {
+      if (e?.name !== 'AbortError') setError(e?.message ?? 'Search failed');
+    } finally {
+      if (!ctrl.signal.aborted) setLoading(false);
+    }
+  }
+
+  useEffect(() => () => abortRef.current?.abort(), []);
 
   const grams = parseFloat(gramsText.replace(',', '.'));
   const validGrams = Number.isFinite(grams) && grams > 0;
@@ -132,7 +128,8 @@ export function LogMealScreen() {
           style={styles.input}
           value={query}
           onChangeText={setQuery}
-          placeholder="Search foods (e.g. chicken breast)"
+          onSubmitEditing={runSearch}
+          placeholder="Search foods (e.g. beef flank)"
           placeholderTextColor={colors.textMuted}
           autoCorrect={false}
           returnKeyType="search"
