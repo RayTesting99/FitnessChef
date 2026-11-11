@@ -15,6 +15,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { dateKey } from '../lib/dates';
 import { XP_PER_ENTRY } from '../lib/gamification';
+import { estimateMeal, MAX_FOOD_CHARS } from '../lib/estimate';
 import { scale } from '../lib/macros';
 import { searchFoods } from '../lib/usda';
 import { useApp } from '../store/AppContext';
@@ -28,6 +29,7 @@ export function LogMealScreen() {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<FoodResult[]>([]);
   const [loading, setLoading] = useState(false);
+  const [estimating, setEstimating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [searched, setSearched] = useState(false);
   const [selected, setSelected] = useState<FoodResult | null>(null);
@@ -52,6 +54,27 @@ export function LogMealScreen() {
       if (e?.name !== 'AbortError') setError(e?.message ?? 'Search failed');
     } finally {
       if (!ctrl.signal.aborted) setLoading(false);
+    }
+  }
+
+  // AI text estimate via the Render backend. Result joins the normal grams/preview/save flow.
+  async function runEstimate() {
+    const q = query.trim();
+    if (q.length < 2 || q.length > MAX_FOOD_CHARS) return;
+    Keyboard.dismiss();
+    abortRef.current?.abort();
+    const ctrl = new AbortController();
+    abortRef.current = ctrl;
+    setEstimating(true);
+    setError(null);
+    try {
+      const { result, grams: parsed } = await estimateMeal(q, ctrl.signal);
+      setSelected(result);
+      setGramsText(parsed ? String(parsed) : '100');
+    } catch (e: any) {
+      if (e?.name !== 'AbortError') setError(e?.message ?? 'Estimate failed');
+    } finally {
+      if (!ctrl.signal.aborted) setEstimating(false);
     }
   }
 
@@ -83,7 +106,7 @@ export function LogMealScreen() {
         <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
           <View style={styles.content}>
             <Pressable onPress={() => setSelected(null)}>
-              <Text style={styles.back}>‹ Back to results</Text>
+              <Text style={styles.back}>‹ Back</Text>
             </Pressable>
             <Text style={styles.foodName}>{selected.name}</Text>
             {selected.brand ? <Text style={styles.sub}>{selected.brand}</Text> : null}
@@ -129,11 +152,28 @@ export function LogMealScreen() {
           value={query}
           onChangeText={setQuery}
           onSubmitEditing={runSearch}
-          placeholder="Search foods (e.g. beef flank)"
+          placeholder="Search foods, or describe a meal (e.g. 200g chicken breast and rice)"
           placeholderTextColor={colors.textMuted}
           autoCorrect={false}
           returnKeyType="search"
+          maxLength={MAX_FOOD_CHARS}
+          editable={!estimating}
         />
+        <Pressable
+          style={[styles.aiButton, (estimating || query.trim().length < 2) && styles.ctaDisabled]}
+          disabled={estimating || query.trim().length < 2}
+          onPress={runEstimate}
+        >
+          <Text style={styles.aiButtonText}>Estimate with AI</Text>
+        </Pressable>
+        {estimating ? (
+          <View style={styles.estimating}>
+            <ActivityIndicator color={colors.primary} />
+            <Text style={styles.sub}>
+              Estimating… the first request can take up to a minute while the server wakes up.
+            </Text>
+          </View>
+        ) : null}
         {loading ? <ActivityIndicator style={styles.spinner} color={colors.primary} /> : null}
         {error ? <Text style={styles.error}>{error}</Text> : null}
         <FlatList
@@ -178,6 +218,16 @@ const styles = StyleSheet.create({
     marginBottom: spacing.md,
   },
   spinner: { marginVertical: spacing.md },
+  aiButton: {
+    borderWidth: 1,
+    borderColor: colors.primary,
+    borderRadius: radius.pill,
+    paddingVertical: spacing.md,
+    alignItems: 'center',
+    marginBottom: spacing.md,
+  },
+  aiButtonText: { color: colors.primary, fontSize: fonts.sizes.md, fontWeight: fonts.weights.bold },
+  estimating: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, marginBottom: spacing.md },
   error: { color: colors.danger, marginBottom: spacing.md },
   row: {
     backgroundColor: colors.surface,
