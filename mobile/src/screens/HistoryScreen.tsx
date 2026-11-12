@@ -1,7 +1,8 @@
 import { Ionicons } from '@expo/vector-icons';
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Alert, Pressable, SectionList, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { EditEntryModal } from '../components/EditEntryModal';
 import { formatDayHeading } from '../lib/dates';
 import { entryMacros, sumMacros } from '../lib/macros';
 import { useApp } from '../store/AppContext';
@@ -9,7 +10,8 @@ import { colors, fonts, radius, shadow, spacing } from '../theme';
 import { Entry } from '../types';
 
 export function HistoryScreen() {
-  const { entries, deleteEntry } = useApp();
+  const { entries, deleteEntry, updateEntry } = useApp();
+  const [editing, setEditing] = useState<Entry | null>(null);
 
   const sections = useMemo(() => {
     const byDay = new Map<string, Entry[]>();
@@ -56,7 +58,7 @@ export function HistoryScreen() {
           const m = entryMacros(item);
           return (
             <View style={[styles.row, shadow.card]}>
-              <View style={styles.rowMain}>
+              <Pressable style={styles.rowMain} onPress={() => setEditing(item)} accessibilityLabel={`Edit ${item.name}`}>
                 <Text style={styles.rowName} numberOfLines={2}>
                   {item.name}
                 </Text>
@@ -64,12 +66,23 @@ export function HistoryScreen() {
                   {Math.round(item.grams)} g · {Math.round(m.calories)} kcal · P {m.protein.toFixed(0)} · C{' '}
                   {m.carbs.toFixed(0)} · F {m.fat.toFixed(0)}
                 </Text>
-              </View>
+              </Pressable>
+              <Pressable hitSlop={10} onPress={() => setEditing(item)}>
+                <Ionicons name="create-outline" size={20} color={colors.primary} />
+              </Pressable>
               <Pressable hitSlop={10} onPress={() => confirmDelete(item)}>
                 <Ionicons name="trash-outline" size={20} color={colors.textMuted} />
               </Pressable>
             </View>
           );
+        }}
+      />
+      <EditEntryModal
+        entry={editing}
+        onClose={() => setEditing(null)}
+        onSave={(id, patch) => {
+          updateEntry(id, patch);
+          setEditing(null);
         }}
       />
     </SafeAreaView>
