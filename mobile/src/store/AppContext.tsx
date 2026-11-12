@@ -15,7 +15,11 @@ interface AppState {
   setTargets: (t: Targets) => void;
   addEntry: (food: FoodResult, grams: number, date: string) => void;
   deleteEntry: (id: string) => void;
+  /** Edits name, grams or per-100g macros. Keeps id, date and loggedAt so streak, XP and ordering are unchanged. */
+  updateEntry: (id: string, patch: EntryPatch) => void;
 }
+
+export type EntryPatch = Partial<Pick<Entry, 'name' | 'grams' | 'cal100' | 'protein100' | 'carbs100' | 'fat100'>>;
 
 const Ctx = createContext<AppState | null>(null);
 
@@ -63,9 +67,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setEntries((prev) => prev.filter((e) => e.id !== id));
   }, []);
 
+  const updateEntry = useCallback((id: string, patch: EntryPatch) => {
+    setEntries((prev) => prev.map((e) => (e.id === id ? { ...e, ...patch } : e)));
+  }, []);
+
   const value = useMemo<AppState>(
-    () => ({ loaded, entries, targets, setTargets, addEntry, deleteEntry }),
-    [loaded, entries, targets, setTargets, addEntry, deleteEntry],
+    () => ({ loaded, entries, targets, setTargets, addEntry, deleteEntry, updateEntry }),
+    [loaded, entries, targets, setTargets, addEntry, deleteEntry, updateEntry],
   );
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
