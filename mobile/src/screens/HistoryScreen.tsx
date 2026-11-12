@@ -3,6 +3,8 @@ import React, { useMemo, useState } from 'react';
 import { Alert, Pressable, SectionList, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Art } from '../art/Art';
+import { Decor } from '../art/Decor';
+import { PROGRESS_DECOR } from '../art/decor';
 import { EditEntryModal } from '../components/EditEntryModal';
 import { WeekChart } from '../components/WeekChart';
 import { dateKey, formatDayHeading } from '../lib/dates';
@@ -50,6 +52,7 @@ export function HistoryScreen() {
 
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
+      <Decor items={PROGRESS_DECOR} />
       <SectionList
         sections={sections}
         keyExtractor={(e) => e.id}

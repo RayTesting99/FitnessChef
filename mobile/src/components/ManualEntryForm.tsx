@@ -10,6 +10,8 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Decor } from '../art/Decor';
+import { KITCHEN_DECOR } from '../art/decor';
 import { XP_PER_ENTRY } from '../lib/gamification';
 import { Basis, EMPTY_MANUAL, ManualTexts, parseManual } from '../lib/manual';
 import { scale } from '../lib/macros';
@@ -46,6 +48,7 @@ export function ManualEntryForm({ onSave, onBack }: Props) {
 
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
+      <Decor items={KITCHEN_DECOR} />
       <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
           <Pressable onPress={onBack}>

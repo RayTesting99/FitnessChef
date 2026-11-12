@@ -4,6 +4,8 @@ import React, { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Art } from '../art/Art';
+import { Decor } from '../art/Decor';
+import { GYM_DECOR } from '../art/decor';
 import { ProgressBar } from '../components/ProgressBar';
 import { TargetsModal } from '../components/TargetsModal';
 import { dateKey } from '../lib/dates';
@@ -26,6 +28,7 @@ export function HomeScreen() {
 
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
+      <Decor items={GYM_DECOR} />
       <ScrollView contentContainerStyle={styles.content}>
         <Text style={styles.title}>FitnessChef</Text>
 

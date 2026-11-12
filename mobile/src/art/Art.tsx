@@ -11,8 +11,8 @@ interface Props {
   height?: number;
 }
 
-const RATIO: Record<ArtName, number> = { bear: 1, rabbit: 1, fox: 1, owl: 120 / 140, kitchenShelf: 100 / 360 };
+const RATIO: Partial<Record<ArtName, number>> = { owl: 120 / 140, kitchenShelf: 100 / 360 };
 
 export function Art({ name, size = 48, height }: Props) {
-  return <SvgXml xml={svgs[name]} width={size} height={height ?? size * RATIO[name]} />;
+  return <SvgXml xml={svgs[name]} width={size} height={height ?? size * (RATIO[name] ?? 1)} />;
 }

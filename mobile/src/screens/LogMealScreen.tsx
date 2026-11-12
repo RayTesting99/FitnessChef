@@ -14,6 +14,8 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Art } from '../art/Art';
+import { Decor } from '../art/Decor';
+import { KITCHEN_DECOR } from '../art/decor';
 import { ManualEntryForm } from '../components/ManualEntryForm';
 import { dateKey } from '../lib/dates';
 import { XP_PER_ENTRY } from '../lib/gamification';
@@ -119,6 +121,7 @@ export function LogMealScreen() {
   if (selected) {
     return (
       <SafeAreaView style={styles.safe} edges={['top']}>
+        <Decor items={KITCHEN_DECOR} />
         <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
           <View style={styles.content}>
             <Pressable onPress={() => setSelected(null)}>
@@ -161,6 +164,7 @@ export function LogMealScreen() {
 
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
+        <Decor items={KITCHEN_DECOR} />
       <View style={styles.content}>
         <Text style={styles.title}>Log a meal</Text>
         <View style={styles.shelf}>
