@@ -1,7 +1,7 @@
 {
   "name": "macro-estimate-backend",
   "version": "1.0.0",
-  "description": "Backend that proxies macro estimate requests to the Anthropic API.",
+  "description": "Backend that proxies macro estimate requests to the Google Gemini API.",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
