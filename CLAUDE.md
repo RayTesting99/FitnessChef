@@ -8,8 +8,8 @@ The repo holds:
 
 - `mobile/`: the Expo (React Native, TypeScript) app. Free-tier flow: Home (today's progress, streak, XP, editable daily targets), Log meal (USDA search, manual entry, and an "Estimate with AI" text description that calls the Gemini backend), History (Today shown separately from earlier days, a 7-day calorie chart, edit and delete entries). Local storage only (AsyncStorage). Run with `cd mobile && npx expo start` and scan the QR code in Expo Go. Theme lives in `mobile/src/theme.ts` (default palette plus a warm `kitchen` palette used on the Log screens). Cartoon artwork is hand-drawn SVG in `mobile/src/art/svgs.ts` (rendered with `react-native-svg`); per-screen decoration layouts are in `mobile/src/art/decor.ts`.
 - `server.js`: the Express backend, deployed and live at **https://fitnesschef.onrender.com**. It proxies to Google Gemini (`gemini-3.1-flash-lite`) and needs the `GEMINI_API_KEY` env var.
-- `package.json`: the backend's package (`npm start` → `node server.js`, Node >= 18). Its `description` field still says "Anthropic API". That's stale; the backend uses Gemini.
-- `index.html`: the original single-file web prototype ("Macro Tracker"). It stores the log, targets and backend URL in `localStorage` and calls `/estimate`. Use it as a reference for UX and logic when building the Expo app.
+- `package.json`: the backend's package (`npm start` → `node server.js`, Node >= 18).
+- `index.html`: the original single-file web prototype ("Macro Tracker"). It stores the log, targets, backend URL and an optional app key in `localStorage` and calls `/estimate`, sending the key as `x-app-key` when one is set. Use it as a reference for UX and logic when building the Expo app.
 
 ## Backend API
 
@@ -37,7 +37,7 @@ There are **two separate ways to get macros into a log entry**. They are not dup
 
 **What the Gemini backend will do for the paid tier:** new endpoints that accept a photo or video and send it to Gemini as image/video parts. These do not exist yet.
 
-**Current app wiring:** Log meal offers USDA search, manual entry, and "Estimate with AI" (text description, via `mobile/src/lib/estimate.ts`). The estimate button calls `POST /estimate` with a 90 s timeout (Render cold starts) and sends `x-app-key` when `EXPO_PUBLIC_APP_KEY` is set. The key is bundled into the client, so it is a deterrent against casual abuse only, not real auth. `/estimate` still has no per-user auth or paywall, and the text estimate is currently available to everyone; which tier it belongs to is undecided. Add real per-user server-side gating before any paid feature depends on it. `index.html` sends no key, so it gets 401s once `APP_KEY` is set on the server.
+**Current app wiring:** Log meal offers USDA search, manual entry, and "Estimate with AI" (text description, via `mobile/src/lib/estimate.ts`). The estimate button calls `POST /estimate` with a 90 s timeout (Render cold starts) and sends `x-app-key` when `EXPO_PUBLIC_APP_KEY` is set. The key is bundled into the client, so it is a deterrent against casual abuse only, not real auth. `/estimate` still has no per-user auth or paywall, and the text estimate is currently available to everyone; which tier it belongs to is undecided. Add real per-user server-side gating before any paid feature depends on it. `index.html` has an optional App key field (next to the backend URL) and shows a specific message on 401 or 429, so it keeps working when `APP_KEY` is set as long as the same key is entered there.
 
 Both sources produce the same result shape, macros **per 100 g**, so they feed into one shared log entry (`Entry` in `mobile/src/types.ts`).
 
