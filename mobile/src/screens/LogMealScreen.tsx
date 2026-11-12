@@ -13,6 +13,7 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { ManualEntryForm } from '../components/ManualEntryForm';
 import { dateKey } from '../lib/dates';
 import { XP_PER_ENTRY } from '../lib/gamification';
 import { estimateMeal, MAX_FOOD_CHARS } from '../lib/estimate';
@@ -30,6 +31,7 @@ export function LogMealScreen() {
   const [results, setResults] = useState<FoodResult[]>([]);
   const [loading, setLoading] = useState(false);
   const [estimating, setEstimating] = useState(false);
+  const [manual, setManual] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [searched, setSearched] = useState(false);
   const [selected, setSelected] = useState<FoodResult | null>(null);
@@ -100,6 +102,19 @@ export function LogMealScreen() {
     nav.navigate('History');
   }
 
+  if (manual) {
+    return (
+      <ManualEntryForm
+        onBack={() => setManual(false)}
+        onSave={(food, g) => {
+          addEntry(food, g, dateKey());
+          setManual(false);
+          nav.navigate('History');
+        }}
+      />
+    );
+  }
+
   if (selected) {
     return (
       <SafeAreaView style={styles.safe} edges={['top']}>
@@ -166,6 +181,9 @@ export function LogMealScreen() {
         >
           <Text style={styles.aiButtonText}>Estimate with AI</Text>
         </Pressable>
+        <Pressable style={styles.manualLink} onPress={() => setManual(true)} disabled={estimating}>
+          <Text style={styles.manualLinkText}>Or enter nutrition manually</Text>
+        </Pressable>
         {estimating ? (
           <View style={styles.estimating}>
             <ActivityIndicator color={colors.primary} />
@@ -227,6 +245,8 @@ const styles = StyleSheet.create({
     marginBottom: spacing.md,
   },
   aiButtonText: { color: colors.primary, fontSize: fonts.sizes.md, fontWeight: fonts.weights.bold },
+  manualLink: { alignItems: 'center', paddingVertical: spacing.sm, marginBottom: spacing.md },
+  manualLinkText: { color: colors.primary, fontSize: fonts.sizes.sm, fontWeight: fonts.weights.medium },
   estimating: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, marginBottom: spacing.md },
   error: { color: colors.danger, marginBottom: spacing.md },
   row: {
