@@ -13,6 +13,7 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Art } from '../art/Art';
 import { ManualEntryForm } from '../components/ManualEntryForm';
 import { dateKey } from '../lib/dates';
 import { XP_PER_ENTRY } from '../lib/gamification';
@@ -20,7 +21,7 @@ import { estimateMeal, MAX_FOOD_CHARS } from '../lib/estimate';
 import { scale } from '../lib/macros';
 import { searchFoods } from '../lib/usda';
 import { useApp } from '../store/AppContext';
-import { colors, fonts, radius, shadow, spacing } from '../theme';
+import { fonts, kitchen as colors, radius, shadow, spacing } from '../theme';
 import { FoodResult } from '../types';
 
 export function LogMealScreen() {
@@ -162,6 +163,9 @@ export function LogMealScreen() {
     <SafeAreaView style={styles.safe} edges={['top']}>
       <View style={styles.content}>
         <Text style={styles.title}>Log a meal</Text>
+        <View style={styles.shelf}>
+          <Art name="kitchenShelf" size={280} />
+        </View>
         <TextInput
           style={styles.input}
           value={query}
@@ -235,6 +239,7 @@ const styles = StyleSheet.create({
     color: colors.text,
     marginBottom: spacing.md,
   },
+  shelf: { alignItems: 'center', marginTop: -spacing.sm, marginBottom: spacing.md },
   spinner: { marginVertical: spacing.md },
   aiButton: {
     borderWidth: 1,

@@ -26,3 +26,8 @@ export function formatDayHeading(key: string, today: string = dateKey()): string
     day: 'numeric',
   });
 }
+
+/** Single-letter weekday for a date key, e.g. "M" for Monday (locale-independent). */
+export function weekdayLetter(key: string): string {
+  return 'SMTWTFS'[parseKey(key).getDay()];
+}

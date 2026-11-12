@@ -13,7 +13,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { XP_PER_ENTRY } from '../lib/gamification';
 import { Basis, EMPTY_MANUAL, ManualTexts, parseManual } from '../lib/manual';
 import { scale } from '../lib/macros';
-import { colors, fonts, radius, shadow, spacing } from '../theme';
+import { fonts, kitchen as colors, radius, shadow, spacing } from '../theme';
 import { FoodResult } from '../types';
 
 interface Props {

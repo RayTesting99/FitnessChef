@@ -9,15 +9,20 @@ interface Props {
   unit?: string;
   color: string;
   large?: boolean;
+  /** Optional artwork shown before the label (e.g. a cartoon animal). */
+  icon?: React.ReactNode;
 }
 
-export function ProgressBar({ label, value, target, unit = 'g', color, large }: Props) {
+export function ProgressBar({ label, value, target, unit = 'g', color, large, icon }: Props) {
   const pct = target > 0 ? Math.min(value / target, 1) : 0;
   const over = value > target;
   return (
     <View style={styles.wrap}>
       <View style={styles.row}>
-        <Text style={[styles.label, large && styles.labelLarge]}>{label}</Text>
+        <View style={styles.labelRow}>
+          {icon}
+          <Text style={[styles.label, large && styles.labelLarge]}>{label}</Text>
+        </View>
         <Text style={[styles.value, large && styles.valueLarge]}>
           {Math.round(value)}
           <Text style={styles.target}>
@@ -42,6 +47,7 @@ export function ProgressBar({ label, value, target, unit = 'g', color, large }: 
 const styles = StyleSheet.create({
   wrap: { marginBottom: spacing.md },
   row: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: spacing.xs },
+  labelRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
   label: { fontSize: fonts.sizes.sm, color: colors.textMuted, fontWeight: fonts.weights.medium },
   labelLarge: { fontSize: fonts.sizes.md, color: colors.text },
   value: { fontSize: fonts.sizes.md, color: colors.text, fontWeight: fonts.weights.bold },

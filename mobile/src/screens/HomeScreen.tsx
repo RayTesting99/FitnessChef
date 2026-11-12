@@ -3,6 +3,7 @@ import { useNavigation } from '@react-navigation/native';
 import React, { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Art } from '../art/Art';
 import { ProgressBar } from '../components/ProgressBar';
 import { TargetsModal } from '../components/TargetsModal';
 import { dateKey } from '../lib/dates';
@@ -55,10 +56,10 @@ export function HomeScreen() {
               <Ionicons name="create-outline" size={22} color={colors.primary} />
             </Pressable>
           </View>
-          <ProgressBar large label="Calories" unit="kcal" color={colors.calories} value={totals.calories} target={targets.calories} />
-          <ProgressBar label="Protein" color={colors.protein} value={totals.protein} target={targets.protein} />
-          <ProgressBar label="Carbs" color={colors.carbs} value={totals.carbs} target={targets.carbs} />
-          <ProgressBar label="Fat" color={colors.fat} value={totals.fat} target={targets.fat} />
+          <ProgressBar large icon={<Ionicons name="flame" size={26} color={colors.calories} />} label="Calories" unit="kcal" color={colors.calories} value={totals.calories} target={targets.calories} />
+          <ProgressBar icon={<Art name="bear" size={44} />} label="Protein" color={colors.protein} value={totals.protein} target={targets.protein} />
+          <ProgressBar icon={<Art name="rabbit" size={44} />} label="Carbs" color={colors.carbs} value={totals.carbs} target={targets.carbs} />
+          <ProgressBar icon={<Art name="fox" size={44} />} label="Fat" color={colors.fat} value={totals.fat} target={targets.fat} />
           <View style={styles.metaRow}>
             <Text style={styles.meta}>
               {todays.length} {todays.length === 1 ? 'meal' : 'meals'} logged today
