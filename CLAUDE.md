@@ -6,7 +6,7 @@ FitnessChef is a macro-tracking mobile app built with **React Native + Expo**. U
 
 The repo holds:
 
-- `mobile/`: the Expo (React Native, TypeScript) app. Free-tier flow only so far: Home, Log meal (USDA search), History, with a streak and XP. Local storage only (AsyncStorage). It does **not** call the Gemini backend yet. Run with `cd mobile && npx expo start` and scan the QR code in Expo Go. Theme lives in `mobile/src/theme.ts`.
+- `mobile/`: the Expo (React Native, TypeScript) app. Free-tier flow: Home (today's progress, streak, XP, editable daily targets), Log meal (USDA search, manual entry, and an "Estimate with AI" text description that calls the Gemini backend), History (Today shown separately from earlier days, a 7-day calorie chart, edit and delete entries). Local storage only (AsyncStorage). Run with `cd mobile && npx expo start` and scan the QR code in Expo Go. Theme lives in `mobile/src/theme.ts` (default palette plus a warm `kitchen` palette used on the Log screens). Cartoon artwork is hand-drawn SVG in `mobile/src/art/svgs.ts` (rendered with `react-native-svg`); per-screen decoration layouts are in `mobile/src/art/decor.ts`.
 - `server.js`: the Express backend, deployed and live at **https://fitnesschef.onrender.com**. It proxies to Google Gemini (`gemini-3.1-flash-lite`) and needs the `GEMINI_API_KEY` env var.
 - `package.json`: the backend's package (`npm start` → `node server.js`, Node >= 18). Its `description` field still says "Anthropic API". That's stale; the backend uses Gemini.
 - `index.html`: the original single-file web prototype ("Macro Tracker"). It stores the log, targets and backend URL in `localStorage` and calls `/estimate`. Use it as a reference for UX and logic when building the Expo app.
@@ -14,7 +14,7 @@ The repo holds:
 ## Backend API
 
 - `GET /`: health check (plain text).
-- `POST /estimate`: body `{ "food": string, "grams"?: number }` → `{ "cal100", "protein100", "carbs100", "fat100" }`. Values are **per 100 g**, so the client scales them by the portion size.
+- `POST /estimate`: body `{ "food": string, "grams"?: number | string }` → `{ "cal100", "protein100", "carbs100", "fat100" }`. Values are **per 100 g**, so the client scales them by the portion size. Protections: per-IP rate limit (20 requests/minute, 429 with `Retry-After`), `food` max 300 characters, `grams` between 0 and 5000 (a numeric string is accepted because `index.html` sends one), and an optional `x-app-key` header checked against the `APP_KEY` env var (401 on mismatch; the check is skipped when `APP_KEY` is unset).
 
 The backend currently handles **text descriptions only**. Photo and video analysis (the paid feature) needs new endpoints that send image or video parts to Gemini. Don't assume they exist yet.
 
@@ -37,11 +37,13 @@ There are **two separate ways to get macros into a log entry**. They are not dup
 
 **What the Gemini backend will do for the paid tier:** new endpoints that accept a photo or video and send it to Gemini as image/video parts. These do not exist yet.
 
-**Current app wiring:** the `mobile/` app does **not** call the backend at all. Log meal uses USDA only. `/estimate` is currently used only by the old `index.html` prototype and is not a user-facing feature in the Expo app. Whether to expose the text estimate in the app (and under which tier) is undecided. Note `/estimate` has no auth or paywall, so anyone who knows the URL can spend the Gemini quota. Add server-side gating before the app uses it.
+**Current app wiring:** Log meal offers USDA search, manual entry, and "Estimate with AI" (text description, via `mobile/src/lib/estimate.ts`). The estimate button calls `POST /estimate` with a 90 s timeout (Render cold starts) and sends `x-app-key` when `EXPO_PUBLIC_APP_KEY` is set. The key is bundled into the client, so it is a deterrent against casual abuse only, not real auth. `/estimate` still has no per-user auth or paywall, and the text estimate is currently available to everyone; which tier it belongs to is undecided. Add real per-user server-side gating before any paid feature depends on it. `index.html` sends no key, so it gets 401s once `APP_KEY` is set on the server.
 
 Both sources produce the same result shape, macros **per 100 g**, so they feed into one shared log entry (`Entry` in `mobile/src/types.ts`).
 
 ## Product model: freemium
+
+**Status:** monetization is under review. The priority is a solid, genuinely free core app first; whether and how to charge (and for what) is deferred until real people have used it. The tiers below are the working plan, not a commitment.
 
 **Free tier**
 - Manual food entry (name, grams, macros).
