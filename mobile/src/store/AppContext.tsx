@@ -1,15 +1,18 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { DEFAULT_TARGETS, sanitizeTargets } from '../lib/targets';
 import { Entry, FoodResult, Targets } from '../types';
 
 const ENTRIES_KEY = 'fitnesschef.entries.v1';
+const TARGETS_KEY = 'fitnesschef.targets.v1';
 
-export const DEFAULT_TARGETS: Targets = { calories: 2000, protein: 150, carbs: 200, fat: 65 };
+export { DEFAULT_TARGETS };
 
 interface AppState {
   loaded: boolean;
   entries: Entry[];
   targets: Targets;
+  setTargets: (t: Targets) => void;
   addEntry: (food: FoodResult, grams: number, date: string) => void;
   deleteEntry: (id: string) => void;
 }
@@ -18,21 +21,28 @@ const Ctx = createContext<AppState | null>(null);
 
 export function AppProvider({ children }: { children: React.ReactNode }) {
   const [entries, setEntries] = useState<Entry[]>([]);
+  const [targets, setTargetsState] = useState<Targets>(DEFAULT_TARGETS);
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
-    AsyncStorage.getItem(ENTRIES_KEY)
-      .then((raw) => {
-        if (raw) setEntries(JSON.parse(raw));
-      })
-      .catch(() => {})
-      .finally(() => setLoaded(true));
+    const entriesP = AsyncStorage.getItem(ENTRIES_KEY).then((raw) => {
+      if (raw) setEntries(JSON.parse(raw));
+    });
+    const targetsP = AsyncStorage.getItem(TARGETS_KEY).then((raw) => {
+      if (raw) setTargetsState(sanitizeTargets(JSON.parse(raw)));
+    });
+    Promise.allSettled([entriesP, targetsP]).finally(() => setLoaded(true));
   }, []);
 
   // Only persist after the initial load so we never overwrite saved data with [].
   useEffect(() => {
     if (loaded) AsyncStorage.setItem(ENTRIES_KEY, JSON.stringify(entries)).catch(() => {});
   }, [entries, loaded]);
+
+  const setTargets = useCallback((t: Targets) => {
+    setTargetsState(t);
+    AsyncStorage.setItem(TARGETS_KEY, JSON.stringify(t)).catch(() => {});
+  }, []);
 
   const addEntry = useCallback((food: FoodResult, grams: number, date: string) => {
     const entry: Entry = {
@@ -54,8 +64,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const value = useMemo<AppState>(
-    () => ({ loaded, entries, targets: DEFAULT_TARGETS, addEntry, deleteEntry }),
-    [loaded, entries, addEntry, deleteEntry],
+    () => ({ loaded, entries, targets, setTargets, addEntry, deleteEntry }),
+    [loaded, entries, targets, setTargets, addEntry, deleteEntry],
   );
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;

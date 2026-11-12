@@ -1,9 +1,10 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
-import React from 'react';
+import React, { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ProgressBar } from '../components/ProgressBar';
+import { TargetsModal } from '../components/TargetsModal';
 import { dateKey } from '../lib/dates';
 import { currentStreak, levelInfo, totalXp } from '../lib/gamification';
 import { sumMacros } from '../lib/macros';
@@ -12,7 +13,8 @@ import { colors, fonts, radius, shadow, spacing } from '../theme';
 
 export function HomeScreen() {
   const nav = useNavigation<any>();
-  const { entries, targets } = useApp();
+  const { entries, targets, setTargets } = useApp();
+  const [editing, setEditing] = useState(false);
 
   const today = dateKey();
   const todays = entries.filter((e) => e.date === today);
@@ -42,7 +44,12 @@ export function HomeScreen() {
         </View>
 
         <View style={[styles.card, shadow.card]}>
-          <Text style={styles.cardTitle}>Today</Text>
+          <View style={styles.cardHeader}>
+            <Text style={styles.cardTitle}>Today</Text>
+            <Pressable onPress={() => setEditing(true)} hitSlop={12} accessibilityLabel="Edit daily targets">
+              <Ionicons name="create-outline" size={22} color={colors.primary} />
+            </Pressable>
+          </View>
           <ProgressBar large label="Calories" unit="kcal" color={colors.calories} value={totals.calories} target={targets.calories} />
           <ProgressBar label="Protein" color={colors.protein} value={totals.protein} target={targets.protein} />
           <ProgressBar label="Carbs" color={colors.carbs} value={totals.carbs} target={targets.carbs} />
@@ -57,6 +64,15 @@ export function HomeScreen() {
           <Text style={styles.ctaText}>Log a meal</Text>
         </Pressable>
       </ScrollView>
+      <TargetsModal
+        visible={editing}
+        targets={targets}
+        onSave={(t) => {
+          setTargets(t);
+          setEditing(false);
+        }}
+        onClose={() => setEditing(false)}
+      />
     </SafeAreaView>
   );
 }
@@ -76,7 +92,8 @@ const styles = StyleSheet.create({
   badgeValue: { fontSize: fonts.sizes.xl, fontWeight: fonts.weights.bold, color: colors.text },
   badgeLabel: { fontSize: fonts.sizes.xs, color: colors.textMuted },
   card: { backgroundColor: colors.surface, borderRadius: radius.lg, padding: spacing.lg, marginBottom: spacing.lg },
-  cardTitle: { fontSize: fonts.sizes.lg, fontWeight: fonts.weights.bold, color: colors.text, marginBottom: spacing.md },
+  cardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: spacing.md },
+  cardTitle: { fontSize: fonts.sizes.lg, fontWeight: fonts.weights.bold, color: colors.text },
   meta: { fontSize: fonts.sizes.sm, color: colors.textMuted, marginTop: spacing.xs },
   cta: {
     flexDirection: 'row',
