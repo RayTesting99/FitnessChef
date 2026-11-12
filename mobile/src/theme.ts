@@ -20,6 +20,21 @@ export const colors = {
   track: '#E8EBE4',
 };
 
+/** Warm autumn-kitchen palette (oranges and browns) used on the Log (food) screens. Same keys as `colors`. */
+export const kitchen: typeof colors = {
+  ...colors,
+  background: '#FBF1E3',
+  surface: '#FFF9F0',
+  border: '#EAD3B5',
+  text: '#4A2C17',
+  textMuted: '#8A6B50',
+  primary: '#C96A1E',
+  primaryDark: '#A5530F',
+  danger: '#B83A2B',
+  calories: '#C96A1E',
+  track: '#F0DFC6',
+};
+
 export const spacing = {
   xs: 4,
   sm: 8,

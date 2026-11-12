@@ -2,7 +2,11 @@ import { Ionicons } from '@expo/vector-icons';
 import React, { useMemo, useState } from 'react';
 import { Alert, Pressable, SectionList, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Art } from '../art/Art';
+import { Decor } from '../art/Decor';
+import { PROGRESS_DECOR } from '../art/decor';
 import { EditEntryModal } from '../components/EditEntryModal';
+import { WeekChart } from '../components/WeekChart';
 import { dateKey, formatDayHeading } from '../lib/dates';
 import { entryMacros, sumMacros } from '../lib/macros';
 import { useApp } from '../store/AppContext';
@@ -10,7 +14,7 @@ import { colors, fonts, radius, shadow, spacing } from '../theme';
 import { Entry } from '../types';
 
 export function HistoryScreen() {
-  const { entries, deleteEntry, updateEntry } = useApp();
+  const { entries, targets, deleteEntry, updateEntry } = useApp();
   const [editing, setEditing] = useState<Entry | null>(null);
 
   // Today gets its own section (always shown once anything has been logged); other days follow under "Earlier".
@@ -48,11 +52,24 @@ export function HistoryScreen() {
 
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
+      <Decor items={PROGRESS_DECOR} />
       <SectionList
         sections={sections}
         keyExtractor={(e) => e.id}
         contentContainerStyle={styles.content}
-        ListHeaderComponent={<Text style={styles.title}>History</Text>}
+        ListHeaderComponent={
+          <View>
+            <View style={styles.headerRow}>
+              <Text style={styles.title}>History</Text>
+              <Art name="owl" size={92} />
+            </View>
+            {entries.length > 0 ? (
+              <View style={[styles.chartCard, shadow.card]}>
+                <WeekChart entries={entries} calorieTarget={targets.calories} />
+              </View>
+            ) : null}
+          </View>
+        }
         ListEmptyComponent={<Text style={styles.empty}>No meals logged yet. Head to the Log tab to add your first one.</Text>}
         stickySectionHeadersEnabled={false}
         renderSectionHeader={({ section }) => (
@@ -118,7 +135,9 @@ export function HistoryScreen() {
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.background },
   content: { padding: spacing.lg, paddingBottom: spacing.xxl },
-  title: { fontSize: fonts.sizes.xl, fontWeight: fonts.weights.bold, color: colors.text, marginBottom: spacing.md },
+  headerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: spacing.md },
+  title: { fontSize: fonts.sizes.xl, fontWeight: fonts.weights.bold, color: colors.text },
+  chartCard: { backgroundColor: colors.surface, borderRadius: radius.lg, padding: spacing.lg },
   empty: { color: colors.textMuted, fontSize: fonts.sizes.md, marginTop: spacing.lg },
   sectionHeader: { marginTop: spacing.lg, marginBottom: spacing.sm },
   todayHeader: {
