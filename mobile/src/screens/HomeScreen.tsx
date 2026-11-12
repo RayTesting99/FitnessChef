@@ -43,7 +43,12 @@ export function HomeScreen() {
           </View>
         </View>
 
-        <View style={[styles.card, shadow.card]}>
+        <Pressable
+          style={[styles.card, shadow.card]}
+          onPress={() => nav.navigate('History')}
+          accessibilityRole="button"
+          accessibilityLabel="View today's logged meals"
+        >
           <View style={styles.cardHeader}>
             <Text style={styles.cardTitle}>Today</Text>
             <Pressable onPress={() => setEditing(true)} hitSlop={12} accessibilityLabel="Edit daily targets">
@@ -54,10 +59,13 @@ export function HomeScreen() {
           <ProgressBar label="Protein" color={colors.protein} value={totals.protein} target={targets.protein} />
           <ProgressBar label="Carbs" color={colors.carbs} value={totals.carbs} target={targets.carbs} />
           <ProgressBar label="Fat" color={colors.fat} value={totals.fat} target={targets.fat} />
-          <Text style={styles.meta}>
-            {todays.length} {todays.length === 1 ? 'meal' : 'meals'} logged today
-          </Text>
-        </View>
+          <View style={styles.metaRow}>
+            <Text style={styles.meta}>
+              {todays.length} {todays.length === 1 ? 'meal' : 'meals'} logged today
+            </Text>
+            <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
+          </View>
+        </Pressable>
 
         <Pressable style={styles.cta} onPress={() => nav.navigate('Log')}>
           <Ionicons name="add-circle" size={22} color={colors.onPrimary} />
@@ -94,7 +102,8 @@ const styles = StyleSheet.create({
   card: { backgroundColor: colors.surface, borderRadius: radius.lg, padding: spacing.lg, marginBottom: spacing.lg },
   cardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: spacing.md },
   cardTitle: { fontSize: fonts.sizes.lg, fontWeight: fonts.weights.bold, color: colors.text },
-  meta: { fontSize: fonts.sizes.sm, color: colors.textMuted, marginTop: spacing.xs },
+  metaRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: spacing.xs },
+  meta: { fontSize: fonts.sizes.sm, color: colors.textMuted },
   cta: {
     flexDirection: 'row',
     gap: spacing.sm,
