@@ -443,7 +443,11 @@
         <label>Estimate backend URL (from Render)</label>
         <input type="text" id="backendUrl" placeholder="https://your-app.onrender.com/estimate">
       </div>
-      <button class="btn btn-ghost" id="saveBackendBtn">Save backend URL</button>
+      <div class="form-row">
+        <label>App key (only if the backend has APP_KEY set)</label>
+        <input type="password" id="appKeyInput" placeholder="Leave empty if not needed" autocomplete="off">
+      </div>
+      <button class="btn btn-ghost" id="saveBackendBtn">Save backend settings</button>
     </div>
   </div>
 
@@ -453,9 +457,11 @@
   var logKey = 'log:' + todayKey;
   var targetsKey = 'targets';
   var backendKey = 'backendUrl';
+  var appKeyStorage = 'appKey';
   var entries = [];
   var targets = { cal: 1850, protein: 150, carbs: 150, fat: 72 };
   var backendUrl = '';
+  var appKey = '';
 
   var dateDisplay = document.getElementById('dateDisplay');
   dateDisplay.textContent = new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' });
@@ -474,6 +480,8 @@
     try {
       var b = localStorage.getItem(backendKey);
       if (b) backendUrl = b;
+      var k = localStorage.getItem(appKeyStorage);
+      if (k) appKey = k;
     } catch(e) {}
     applyTargetsToInputs();
     applyBackendToInput();
@@ -498,13 +506,18 @@
   }
 
   function saveBackend() {
-    try { localStorage.setItem(backendKey, backendUrl); }
+    try {
+      localStorage.setItem(backendKey, backendUrl);
+      localStorage.setItem(appKeyStorage, appKey);
+    }
     catch(e) { console.error('save backend url failed', e); }
   }
 
   function applyBackendToInput() {
     var el = document.getElementById('backendUrl');
     if (el) el.value = backendUrl;
+    var ak = document.getElementById('appKeyInput');
+    if (ak) ak.value = appKey;
   }
 
   function totals() {
@@ -685,9 +698,21 @@
     try {
       var response = await fetch(backendUrl, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: appKey
+          ? { 'Content-Type': 'application/json', 'x-app-key': appKey }
+          : { 'Content-Type': 'application/json' },
         body: JSON.stringify({ food: name, grams: grams })
       });
+      if (response.status === 401) {
+        var authErr = new Error('auth');
+        authErr.isAuth = true;
+        throw authErr;
+      }
+      if (response.status === 429) {
+        var rateErr = new Error('rate');
+        rateErr.isRate = true;
+        throw rateErr;
+      }
       var parsed = await response.json();
       if (!response.ok || parsed.error) {
         throw new Error(parsed.error || 'Backend returned an error');
@@ -700,7 +725,11 @@
       statusEl.textContent = 'Estimated per 100g — feel free to adjust if you know better.';
     } catch (e) {
       console.error('estimate failed', e);
-      statusEl.textContent = "Couldn't reach the estimate backend. Check the URL, or enter values manually.";
+      statusEl.textContent = e.isAuth
+        ? 'The backend rejected the request: the app key is missing or wrong. Add it under Edit daily targets, or enter values manually.'
+        : e.isRate
+          ? 'Too many estimates right now. Wait a minute and try again, or enter values manually.'
+          : "Couldn't reach the estimate backend. Check the URL, or enter values manually.";
       statusEl.classList.add('error');
     } finally {
       btn.disabled = false;
@@ -709,10 +738,11 @@
 
   document.getElementById('saveBackendBtn').addEventListener('click', function() {
     backendUrl = document.getElementById('backendUrl').value.trim();
+    appKey = document.getElementById('appKeyInput').value.trim();
     saveBackend();
     var statusEl = document.getElementById('estimateStatus');
     statusEl.classList.remove('error');
-    statusEl.textContent = 'Backend URL saved.';
+    statusEl.textContent = 'Backend settings saved.';
   });
 
   document.getElementById('tabWeight').addEventListener('click', function() {
