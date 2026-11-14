@@ -16,7 +16,7 @@ import { colors, fonts, radius, shadow, spacing } from '../theme';
 
 export function HomeScreen() {
   const nav = useNavigation<any>();
-  const { entries, targets, setTargets } = useApp();
+  const { entries, targets, setTargets, openTour } = useApp();
   const [editing, setEditing] = useState(false);
 
   const today = dateKey();
@@ -30,7 +30,12 @@ export function HomeScreen() {
     <SafeAreaView style={styles.safe} edges={['top']}>
       <Decor items={GYM_DECOR} />
       <ScrollView contentContainerStyle={styles.content}>
-        <Text style={styles.title}>FitnessChef</Text>
+        <View style={styles.titleRow}>
+          <Text style={styles.title}>FitnessChef</Text>
+          <Pressable onPress={openTour} hitSlop={12} accessibilityLabel="How FitnessChef works">
+            <Ionicons name="help-circle-outline" size={26} color={colors.textMuted} />
+          </Pressable>
+        </View>
 
         <View style={styles.badges}>
           <View style={[styles.badge, shadow.card]}>
@@ -46,6 +51,16 @@ export function HomeScreen() {
             </Text>
           </View>
         </View>
+
+        {entries.length === 0 ? (
+          <View style={[styles.emptyCard, shadow.card]}>
+            <Art name="bear" size={64} />
+            <View style={styles.emptyText}>
+              <Text style={styles.emptyTitle}>Nothing logged yet</Text>
+              <Text style={styles.emptySub}>Log your first meal to start your streak and fill these bars.</Text>
+            </View>
+          </View>
+        ) : null}
 
         <Pressable
           style={[styles.card, shadow.card]}
@@ -92,7 +107,20 @@ export function HomeScreen() {
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.background },
   content: { padding: spacing.lg, paddingBottom: spacing.xxl },
-  title: { fontSize: fonts.sizes.xl, fontWeight: fonts.weights.bold, color: colors.text, marginBottom: spacing.lg },
+  titleRow: { flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center', gap: spacing.sm, marginBottom: spacing.lg },
+  title: { fontSize: fonts.sizes.xl, fontWeight: fonts.weights.bold, color: colors.text },
+  emptyCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.md,
+    backgroundColor: colors.surface,
+    borderRadius: radius.lg,
+    padding: spacing.lg,
+    marginBottom: spacing.lg,
+  },
+  emptyText: { flex: 1 },
+  emptyTitle: { fontSize: fonts.sizes.md, fontWeight: fonts.weights.bold, color: colors.text },
+  emptySub: { fontSize: fonts.sizes.sm, color: colors.textMuted, marginTop: 2 },
   badges: { flexDirection: 'row', gap: spacing.md, marginBottom: spacing.lg },
   badge: {
     flex: 1,

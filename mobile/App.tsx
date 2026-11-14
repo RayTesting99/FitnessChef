@@ -8,6 +8,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { HistoryScreen } from './src/screens/HistoryScreen';
 import { HomeScreen } from './src/screens/HomeScreen';
 import { LogMealScreen } from './src/screens/LogMealScreen';
+import { OnboardingScreen } from './src/screens/OnboardingScreen';
 import { AppProvider, useApp } from './src/store/AppContext';
 import { colors } from './src/theme';
 
@@ -25,7 +26,7 @@ const icons: Record<string, [keyof typeof Ionicons.glyphMap, keyof typeof Ionico
 };
 
 function Tabs() {
-  const { loaded } = useApp();
+  const { loaded, showTour, finishTour, targets } = useApp();
   if (!loaded) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', backgroundColor: colors.background }}>
@@ -33,6 +34,7 @@ function Tabs() {
       </View>
     );
   }
+  if (showTour) return <OnboardingScreen initialTargets={targets} onDone={finishTour} />;
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
