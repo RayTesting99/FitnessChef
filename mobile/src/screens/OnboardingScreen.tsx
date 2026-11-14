@@ -16,6 +16,9 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Art } from '../art/Art';
 import { Decor } from '../art/Decor';
 import { KITCHEN_DECOR } from '../art/decor';
+import { Celebration } from '../components/Celebration';
+import { ExcitedAnimal } from '../components/ExcitedAnimal';
+import { Reveal } from '../components/Reveal';
 import { WavingAnimal } from '../components/WavingAnimal';
 import { parseTargets, TARGET_FIELDS } from '../lib/targets';
 import { fonts, kitchen as colors, radius, shadow, spacing } from '../theme';
@@ -57,37 +60,6 @@ const WAYS: { icon: Icon; title: string; text: string }[] = [
 
 const PAGES = 5;
 const GOALS_PAGE = 3;
-
-/** A star that gently floats, used for the celebration on the last page. */
-function FloatingStar({ left, top, size, delay }: { left: number; top: number; size: number; delay: number }) {
-  const v = useRef(new Animated.Value(0)).current;
-  useEffect(() => {
-    const loop = Animated.loop(
-      Animated.sequence([
-        Animated.timing(v, { toValue: 1, duration: 900, easing: Easing.inOut(Easing.sin), useNativeDriver: true }),
-        Animated.timing(v, { toValue: 0, duration: 900, easing: Easing.inOut(Easing.sin), useNativeDriver: true }),
-      ]),
-    );
-    const t = setTimeout(() => loop.start(), delay);
-    return () => {
-      clearTimeout(t);
-      loop.stop();
-    };
-  }, [v, delay]);
-  return (
-    <Animated.View
-      style={{
-        position: 'absolute',
-        left,
-        top,
-        opacity: v.interpolate({ inputRange: [0, 1], outputRange: [0.5, 1] }),
-        transform: [{ translateY: v.interpolate({ inputRange: [0, 1], outputRange: [0, -12] }) }],
-      }}
-    >
-      <Art name="star" size={size} />
-    </Animated.View>
-  );
-}
 
 /** First-launch tour: welcome, mission, how logging works, goals, and a "welcome in" finish. */
 export function OnboardingScreen({ initialTargets, onDone }: Props) {
@@ -157,8 +129,9 @@ export function OnboardingScreen({ initialTargets, onDone }: Props) {
                 <Text style={styles.leadLeft}>
                   Our mission is to be a reliable, easy way to keep track of what you eat, for everyone.
                 </Text>
-                {MISSION.map((m) => (
-                  <View key={m.title} style={[styles.card, shadow.card]}>
+                {MISSION.map((m, i) => (
+                  <Reveal key={m.title} index={i}>
+                  <View style={[styles.card, shadow.card]}>
                     <View style={styles.iconWrap}>
                       <Ionicons name={m.icon} size={22} color={colors.primary} />
                     </View>
@@ -167,6 +140,7 @@ export function OnboardingScreen({ initialTargets, onDone }: Props) {
                       <Text style={styles.cardText}>{m.text}</Text>
                     </View>
                   </View>
+                  </Reveal>
                 ))}
               </View>
             ) : null}
@@ -174,8 +148,9 @@ export function OnboardingScreen({ initialTargets, onDone }: Props) {
             {page === 2 ? (
               <View>
                 <Text style={styles.titleLeft}>Three ways to log a meal</Text>
-                {WAYS.map((w) => (
-                  <View key={w.title} style={[styles.card, shadow.card]}>
+                {WAYS.map((w, i) => (
+                  <Reveal key={w.title} index={i}>
+                  <View style={[styles.card, shadow.card]}>
                     <View style={styles.iconWrap}>
                       <Ionicons name={w.icon} size={22} color={colors.primary} />
                     </View>
@@ -184,6 +159,7 @@ export function OnboardingScreen({ initialTargets, onDone }: Props) {
                       <Text style={styles.cardText}>{w.text}</Text>
                     </View>
                   </View>
+                  </Reveal>
                 ))}
               </View>
             ) : null}
@@ -219,13 +195,11 @@ export function OnboardingScreen({ initialTargets, onDone }: Props) {
             {page === PAGES - 1 ? (
               <View style={styles.center}>
                 <View style={styles.cheer}>
-                  <FloatingStar left={2} top={0} size={30} delay={0} />
-                  <FloatingStar left={136} top={-6} size={24} delay={300} />
-                  <FloatingStar left={262} top={4} size={32} delay={600} />
+                  <Celebration width={296} height={150} />
                   <View style={styles.animalRow}>
-                    <WavingAnimal kind="Bear" size={96} speed={2.2} />
-                    <WavingAnimal kind="Rabbit" size={96} speed={2.2} delay={150} />
-                    <WavingAnimal kind="Fox" size={96} speed={2.2} delay={300} />
+                    <ExcitedAnimal kind="Bear" size={96} delay={0} />
+                    <ExcitedAnimal kind="Rabbit" size={96} delay={180} />
+                    <ExcitedAnimal kind="Fox" size={96} delay={360} />
                   </View>
                 </View>
                 <Text style={styles.title}>You are all set!</Text>
@@ -265,7 +239,7 @@ const styles = StyleSheet.create({
   body: { flexGrow: 1, padding: spacing.lg, justifyContent: 'center' },
   center: { alignItems: 'center' },
   animalRow: { flexDirection: 'row', justifyContent: 'center', gap: spacing.xs },
-  cheer: { alignItems: 'center', justifyContent: 'center', width: 296, height: 120 },
+  cheer: { alignItems: 'center', justifyContent: 'flex-end', width: 296, height: 150 },
   title: { fontSize: fonts.sizes.xl, fontWeight: fonts.weights.bold, color: colors.text, marginTop: spacing.lg, textAlign: 'center' },
   lead: { fontSize: fonts.sizes.md, color: colors.textMuted, textAlign: 'center', marginTop: spacing.md, lineHeight: 22 },
   titleLeft: { fontSize: fonts.sizes.xl, fontWeight: fonts.weights.bold, color: colors.text, marginBottom: spacing.sm },
