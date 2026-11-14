@@ -2,6 +2,10 @@
 
 A macro-tracking mobile app. Log what you eat, track calories, protein, carbs and fat against your daily targets, and build a logging streak. Built with React Native + Expo.
 
+## Mission
+
+Spread awareness of a healthy, balanced diet and support a lifestyle that never feels restricted, with tracking that is easy and reliable. Targets are a guide, not a rulebook, and this is not medical advice: for personal targets, talk to a doctor or dietitian.
+
 ## Features
 
 - **Log meals three ways**

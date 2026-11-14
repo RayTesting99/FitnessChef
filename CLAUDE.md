@@ -2,6 +2,10 @@
 
 FitnessChef is a macro-tracking mobile app built with **React Native + Expo**. Users log food and track calories, protein, carbs and fat against daily targets.
 
+## Mission
+
+Spread awareness of a healthy, balanced diet and support a lifestyle that never feels restricted, with tracking that is easy and reliable. Design consequences: targets are a guide, not a rulebook (avoid guilt-based wording); any rewards or games should reward consistent logging, never eating less; keep copy free of weight-loss framing; AI numbers are always labelled as estimates.
+
 ## Current repo state
 
 The repo holds:

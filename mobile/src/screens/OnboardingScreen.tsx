@@ -39,14 +39,22 @@ const toTexts = (t: Targets): Texts => ({
 
 type Icon = keyof typeof Ionicons.glyphMap;
 const MISSION: { icon: Icon; title: string; text: string }[] = [
-  { icon: 'flash-outline', title: 'Tracking made easy', text: 'Logging a meal should take seconds, not a spreadsheet.' },
+  {
+    icon: 'leaf-outline',
+    title: 'Awareness, not restriction',
+    text: 'Understand what is on your plate so you can fuel your body well and keep a healthy, balanced diet.',
+  },
+  {
+    icon: 'happy-outline',
+    title: 'A lifestyle that feels free',
+    text: 'Your targets are a guide, not a rulebook. No guilt, and no need for perfect days.',
+  },
   {
     icon: 'shield-checkmark-outline',
     title: 'A source you can trust',
     text: 'Real nutrition data from the USDA. Anything the AI guesses is clearly labelled as an estimate.',
   },
-  { icon: 'gift-outline', title: 'Free to use', text: 'No sign-up needed. Just open it and start tracking.' },
-  { icon: 'lock-closed-outline', title: 'Private by default', text: 'Your meals stay on your phone.' },
+  { icon: 'gift-outline', title: 'Free, easy and private', text: 'No sign-up needed, and your meals stay on your phone.' },
 ];
 const WAYS: { icon: Icon; title: string; text: string }[] = [
   { icon: 'search', title: 'Search foods', text: 'Look up real, published nutrition data from the USDA database.' },
@@ -127,7 +135,7 @@ export function OnboardingScreen({ initialTargets, onDone }: Props) {
               <View>
                 <Text style={styles.titleLeft}>What we are about</Text>
                 <Text style={styles.leadLeft}>
-                  Our mission is to be a reliable, easy way to keep track of what you eat, for everyone.
+                  Our mission is to spread awareness of a healthy, balanced diet, and to support a lifestyle that never feels restricted, with tracking that is easy and reliable.
                 </Text>
                 {MISSION.map((m, i) => (
                   <Reveal key={m.title} index={i}>
@@ -168,7 +176,7 @@ export function OnboardingScreen({ initialTargets, onDone }: Props) {
               <View>
                 <Text style={styles.titleLeft}>Set your daily goals</Text>
                 <Text style={styles.leadLeft}>
-                  Tell us what you are aiming for each day. These are just starting numbers, and you can change them any time with the pencil icon on the Home screen.
+                  Tell us what you are aiming for each day. These are just starting numbers, and you can change them any time with the pencil icon on the Home screen. For targets that fit you personally, a doctor or dietitian can help.
                 </Text>
                 {TARGET_FIELDS.map((f) => (
                   <View key={f.key}>
