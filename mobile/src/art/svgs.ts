@@ -110,3 +110,45 @@ export const star = deco(`<path d="M32 6 L39 24 L58 25 L43 37 L48 56 L32 45 L16 
 export const sprout = deco(`<path d="M32 57 V30" fill="none"/><path d="M32 38 Q14 36 12 19 Q30 19 32 38 Z" fill="#7A9A55"/><path d="M32 31 Q50 29 52 12 Q34 12 32 31 Z" fill="#7A9A55"/><ellipse cx="32" cy="57" rx="17" ry="5" fill="#6B4226"/>`);
 export const trophy = deco(`<path d="M18 10 H46 V28 Q46 42 32 44 Q18 42 18 28 Z" fill="#F2B84B"/><path d="M18 15 Q6 15 8 26 Q10 32 18 32 M46 15 Q58 15 56 26 Q54 32 46 32" fill="none"/><rect x="29" y="44" width="6" height="9" fill="#F2B84B"/><rect x="20" y="52" width="24" height="7" rx="2" fill="#6B4226"/>`);
 export const stairsFlag = deco(`<path d="M5 59 H17 V47 H29 V35 H41 V23 H53 V59 Z" fill="#E9C9A0"/><line x1="53" y1="23" x2="53" y2="5"/><path d="M53 5 L39 10 L53 15 Z" fill="#D9482B"/>`);
+
+// ---- Friendly "greeter" poses (waving). The right arm is a separate SVG so the app can swing it from the shoulder. ----
+const hi = (body: string) => `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120"><g stroke="${O}" ${G}>${body}</g></svg>`;
+const arm = (c: string) => `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 28 100"><g stroke="${O}" ${G}><rect x="7" y="12" width="14" height="42" rx="7" fill="${c}"/><circle cx="14" cy="14" r="9" fill="${c}"/></g></svg>`;
+
+export const hiBear = hi(`<rect x="38" y="74" width="44" height="40" rx="16" fill="#E8833A"/>
+<ellipse cx="36" cy="94" rx="7" ry="13" fill="#A9744F"/>
+<circle cx="36" cy="30" r="11" fill="#A9744F"/><circle cx="84" cy="30" r="11" fill="#A9744F"/>
+<circle cx="36" cy="30" r="5" fill="#E9C9A0" stroke="none"/><circle cx="84" cy="30" r="5" fill="#E9C9A0" stroke="none"/>
+<circle cx="60" cy="52" r="27" fill="#A9744F"/>
+<path d="M34 43 Q60 31 86 43 L86 50 Q60 39 34 50 Z" fill="#C8641E"/>
+<ellipse cx="60" cy="62" rx="12" ry="9" fill="#E9C9A0"/>
+<ellipse cx="60" cy="58" rx="4.5" ry="3.2" fill="${O}" stroke="none"/>
+<path d="M52 65 Q60 75 68 65" fill="none"/>
+<circle cx="49" cy="53" r="3" fill="${O}" stroke="none"/><circle cx="71" cy="53" r="3" fill="${O}" stroke="none"/>`);
+export const armBear = arm('#A9744F');
+
+export const hiRabbit = hi(`<rect x="40" y="76" width="40" height="38" rx="15" fill="#6B8E4E"/>
+<ellipse cx="36" cy="95" rx="7" ry="13" fill="#F6DDB8"/>
+<ellipse cx="46" cy="22" rx="8" ry="20" fill="#F6DDB8" transform="rotate(-8 46 22)"/>
+<ellipse cx="74" cy="22" rx="8" ry="20" fill="#F6DDB8" transform="rotate(8 74 22)"/>
+<ellipse cx="46" cy="25" rx="3.5" ry="12" fill="#F2B8A0" stroke="none" transform="rotate(-8 46 25)"/>
+<ellipse cx="74" cy="25" rx="3.5" ry="12" fill="#F2B8A0" stroke="none" transform="rotate(8 74 25)"/>
+<circle cx="60" cy="57" r="25" fill="#F6DDB8"/>
+<rect x="36" y="43" width="48" height="7" rx="3" fill="#C8641E"/>
+<circle cx="50" cy="57" r="3" fill="${O}" stroke="none"/><circle cx="70" cy="57" r="3" fill="${O}" stroke="none"/>
+<circle cx="43" cy="64" r="4" fill="#F2B8A0" stroke="none"/><circle cx="77" cy="64" r="4" fill="#F2B8A0" stroke="none"/>
+<ellipse cx="60" cy="63" rx="3" ry="2.4" fill="#E58F8F" stroke="none"/>
+<path d="M60 65 V68 M60 68 Q55 74 51 69 M60 68 Q65 74 69 69" fill="none"/>`);
+export const armRabbit = arm('#F6DDB8');
+
+export const hiFox = hi(`<path d="M82 104 Q118 102 110 64 Q106 92 80 94 Z" fill="#E8833A"/>
+<rect x="40" y="76" width="40" height="38" rx="15" fill="#4F7C74"/>
+<ellipse cx="36" cy="95" rx="7" ry="13" fill="#E8833A"/>
+<path d="M32 14 L52 34 L30 46 Z" fill="#E8833A"/><path d="M37 26 L47 34 L36 39 Z" fill="#6B4226" stroke="none"/>
+<path d="M88 14 L68 34 L90 46 Z" fill="#E8833A"/><path d="M83 26 L73 34 L84 39 Z" fill="#6B4226" stroke="none"/>
+<ellipse cx="60" cy="54" rx="27" ry="22" fill="#E8833A"/>
+<path d="M40 58 Q49 69 60 72 Q71 69 80 58 Q60 65 40 58 Z" fill="#FFF6E9"/>
+<circle cx="49" cy="50" r="3" fill="${O}" stroke="none"/><circle cx="71" cy="50" r="3" fill="${O}" stroke="none"/>
+<ellipse cx="60" cy="64" rx="4.5" ry="3.3" fill="${O}" stroke="none"/>
+<path d="M54 69 Q60 75 66 69" fill="none"/>`);
+export const armFox = arm('#E8833A');
