@@ -107,7 +107,7 @@ export function HomeScreen() {
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.background },
   content: { padding: spacing.lg, paddingBottom: spacing.xxl },
-  titleRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: spacing.lg },
+  titleRow: { flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center', gap: spacing.sm, marginBottom: spacing.lg },
   title: { fontSize: fonts.sizes.xl, fontWeight: fonts.weights.bold, color: colors.text },
   emptyCard: {
     flexDirection: 'row',
